@@ -170,14 +170,36 @@ export class SuperSimpleQueueHelper implements ISuperSimpleQueueHelper {
 					});
 				}
 
-				if (decision.shouldResolveIncident) {
-					this.cancelEscalationForMonitor(statusChangeResult.monitor.id);
-				}
-
 				// Step 7. Handle incidents (best effort, don't wait)
 				this.incidentService
 					.handleIncident(statusChangeResult.monitor, statusChangeResult.code, decision, status)
 					.then((incident) => {
+						if (decision.shouldResolveIncident) {
+							// Stop recurring escalation once no active incident remains.
+							if (!incident || incident.status === false) {
+								this.cancelEscalationForMonitor(statusChangeResult.monitor.id);
+							}
+
+							// Send one escalation recovery notification only when resolution was persisted.
+							if (incident?.status === false) {
+								const escalationChannelId = statusChangeResult.monitor.escalation?.channelId;
+								if (escalationChannelId) {
+									this.notificationsService
+										.sendEscalationRecoveryNotification(statusChangeResult.monitor, escalationChannelId)
+										.catch((error: unknown) => {
+											this.logger.warn({
+												message: `Error sending escalation recovery notification for monitor ${statusChangeResult.monitor.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+												service: SERVICE_NAME,
+												method: "getMonitorJob",
+												stack: error instanceof Error ? error.stack : undefined,
+											});
+										});
+								}
+							}
+
+							return;
+						}
+
 						if (!incident || !decision.shouldCreateIncident) {
 							return;
 						}

@@ -21,6 +21,7 @@ export interface INotificationsService {
 	deleteById: (id: string, teamId: string) => Promise<Notification>;
 	handleNotifications: (monitor: Monitor, monitorStatusResponse: MonitorStatusResponse, decision: MonitorActionDecision) => Promise<boolean>;
 	sendEscalationNotification: (monitor: Monitor, channelId: string) => Promise<boolean>;
+	sendEscalationRecoveryNotification: (monitor: Monitor, channelId: string) => Promise<boolean>;
 
 	sendTestNotification: (notification: Partial<Notification>) => Promise<NotificationTestResult>;
 	testAllNotifications: (notificationIds: string[]) => Promise<boolean>;
@@ -216,6 +217,61 @@ export class NotificationsService implements INotificationsService {
 			incidentReason: null,
 			notificationReason: "status_change",
 		}, escalationMessage);
+	};
+
+	sendEscalationRecoveryNotification = async (monitor: Monitor, channelId: string) => {
+		const notification = await this.notificationsRepository.findById(channelId, monitor.teamId);
+		const settings = this.settingsService.getSettings();
+		const clientHost = settings.clientHost || "Host not defined";
+
+		this.logger.info({
+			message: "Preparing escalation recovery notification",
+			service: SERVICE_NAME,
+			method: "sendEscalationRecoveryNotification",
+			details: {
+				monitorId: monitor.id,
+				monitorName: monitor.name,
+				escalationChannelId: channelId,
+				resolvedNotificationId: notification.id,
+				resolvedNotificationName: notification.notificationName,
+				resolvedNotificationType: notification.type,
+			},
+		});
+
+		const recoveryMessage: NotificationMessage = {
+			type: "monitor_up",
+			severity: "success",
+			monitor: {
+				id: monitor.id,
+				name: monitor.name,
+				url: monitor.url,
+				type: monitor.type,
+				status: monitor.status,
+			},
+			content: {
+				title: `Escalation Resolved: ${monitor.name}`,
+				summary: `Monitor "${monitor.name}" is back up and operational.`,
+				details: [
+					`URL: ${monitor.url}`,
+					`Current status: ${monitor.status}`,
+					"Escalation has been resolved because the monitor recovered.",
+				],
+				timestamp: new Date(),
+			},
+			clientHost,
+			metadata: {
+				teamId: monitor.teamId,
+				notificationReason: "escalation_recovery",
+			},
+		};
+
+		return this.send(notification, monitor, {} as MonitorStatusResponse, {
+			shouldCreateIncident: false,
+			shouldResolveIncident: true,
+			shouldSendNotification: true,
+			incidentReason: null,
+			notificationReason: "status_change",
+		}, recoveryMessage);
 	};
 
 	sendTestNotification = async (notification: Partial<Notification>): Promise<NotificationTestResult> => {
