@@ -17,10 +17,7 @@ const handleErrors = (error: unknown, req: Request, res: Response, _next: NextFu
 	const runtimeEnv = (process.env.NODE_ENV ?? "").toLowerCase();
 	const debugEnvs = new Set(["development", "dev", "test", "local"]);
 	const shouldIncludeDetails =
-		error instanceof AppError &&
-		typeof error.details !== "undefined" &&
-		debugEnvs.has(runtimeEnv) &&
-		process.env.API_ERROR_DETAILS !== "false";
+		error instanceof AppError && typeof error.details !== "undefined" && debugEnvs.has(runtimeEnv) && process.env.API_ERROR_DETAILS !== "false";
 	res.status(status).json({
 		status,
 		msg: message,

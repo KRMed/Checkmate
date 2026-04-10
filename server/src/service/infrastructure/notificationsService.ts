@@ -196,11 +196,7 @@ export class NotificationsService implements INotificationsService {
 			content: {
 				title: `Escalation: ${monitor.name}`,
 				summary: `Monitor "${monitor.name}" remains unresolved after the escalation delay.`,
-				details: [
-					`URL: ${monitor.url}`,
-					`Current status: ${monitor.status}`,
-					"Escalation triggered because incident was not resolved in time.",
-				],
+				details: [`URL: ${monitor.url}`, `Current status: ${monitor.status}`, "Escalation triggered because incident was not resolved in time."],
 				timestamp: new Date(),
 			},
 			clientHost,
@@ -210,13 +206,19 @@ export class NotificationsService implements INotificationsService {
 			},
 		};
 
-		return this.send(notification, monitor, {} as MonitorStatusResponse, {
-			shouldCreateIncident: false,
-			shouldResolveIncident: false,
-			shouldSendNotification: true,
-			incidentReason: null,
-			notificationReason: "status_change",
-		}, escalationMessage);
+		return this.send(
+			notification,
+			monitor,
+			{} as MonitorStatusResponse,
+			{
+				shouldCreateIncident: false,
+				shouldResolveIncident: false,
+				shouldSendNotification: true,
+				incidentReason: null,
+				notificationReason: "status_change",
+			},
+			escalationMessage
+		);
 	};
 
 	sendEscalationRecoveryNotification = async (monitor: Monitor, channelId: string) => {
@@ -251,11 +253,7 @@ export class NotificationsService implements INotificationsService {
 			content: {
 				title: `Escalation Resolved: ${monitor.name}`,
 				summary: `Monitor "${monitor.name}" is back up and operational.`,
-				details: [
-					`URL: ${monitor.url}`,
-					`Current status: ${monitor.status}`,
-					"Escalation has been resolved because the monitor recovered.",
-				],
+				details: [`URL: ${monitor.url}`, `Current status: ${monitor.status}`, "Escalation has been resolved because the monitor recovered."],
 				timestamp: new Date(),
 			},
 			clientHost,
@@ -265,13 +263,19 @@ export class NotificationsService implements INotificationsService {
 			},
 		};
 
-		return this.send(notification, monitor, {} as MonitorStatusResponse, {
-			shouldCreateIncident: false,
-			shouldResolveIncident: true,
-			shouldSendNotification: true,
-			incidentReason: null,
-			notificationReason: "status_change",
-		}, recoveryMessage);
+		return this.send(
+			notification,
+			monitor,
+			{} as MonitorStatusResponse,
+			{
+				shouldCreateIncident: false,
+				shouldResolveIncident: true,
+				shouldSendNotification: true,
+				incidentReason: null,
+				notificationReason: "status_change",
+			},
+			recoveryMessage
+		);
 	};
 
 	sendTestNotification = async (notification: Partial<Notification>): Promise<NotificationTestResult> => {

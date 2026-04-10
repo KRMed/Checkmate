@@ -777,7 +777,9 @@ const CreateMonitorPage = () => {
 							render={({ field, fieldState }) => (
 								<Stack spacing={theme.spacing(SPACING.XS)}>
 									<TextField
-										fieldLabel={t("pages.createMonitor.form.escalation.option.delayMinutes.label")}
+										fieldLabel={t(
+											"pages.createMonitor.form.escalation.option.delayMinutes.label"
+										)}
 										type="number"
 										value={watchedEscalation?.delayMinutes ?? 0}
 										onChange={(event) => {
@@ -814,7 +816,9 @@ const CreateMonitorPage = () => {
 									name: notification.notificationName,
 								}));
 								const selectedEscalation =
-									notificationOptions.find((notification) => notification.id === watchedEscalation?.channelId) || null;
+									notificationOptions.find(
+										(notification) => notification.id === watchedEscalation?.channelId
+									) || null;
 
 								return (
 									<Stack spacing={theme.spacing(LAYOUT.MD)}>
@@ -822,7 +826,10 @@ const CreateMonitorPage = () => {
 											options={notificationOptions}
 											value={selectedEscalation}
 											getOptionLabel={(option) => option.name}
-											onChange={(_: unknown, newValue: (typeof notificationOptions)[number] | null) => {
+											onChange={(
+												_: unknown,
+												newValue: (typeof notificationOptions)[number] | null
+											) => {
 												const nextChannelId = newValue?.id ?? "";
 												const nextDelay = watchedEscalation?.delayMinutes ?? 0;
 
@@ -839,7 +846,9 @@ const CreateMonitorPage = () => {
 												field.onChange(nextChannelId);
 											}}
 											isOptionEqualToValue={(option, value) => option.id === value.id}
-											fieldLabel={t("pages.createMonitor.form.escalation.option.channel.label")}
+											fieldLabel={t(
+												"pages.createMonitor.form.escalation.option.channel.label"
+											)}
 										/>
 										{selectedEscalation && (
 											<Stack
@@ -851,7 +860,9 @@ const CreateMonitorPage = () => {
 													alignItems="center"
 													width="100%"
 												>
-													<Typography flexGrow={1}>{selectedEscalation.notificationName}</Typography>
+													<Typography flexGrow={1}>
+														{selectedEscalation.notificationName}
+													</Typography>
 													<IconButton
 														size="small"
 														onClick={() => {
